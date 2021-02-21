@@ -450,3 +450,115 @@ console.log(x); // Uncaught ReferenceError
 즉시 실행 함수 내부에서 선언한 변수인 x는 이 함수의 지역 변수이므로 전역 변수와 이름이 충돌하지 않는다. 따라서 일시적인 처리를 수행하고자 할 때 그 내용물을 즉시 실행 함수 안에 작성하면 전역 유효 공간을 오염시키지 않고 실행 할 수 있다.
 
 
+### 객체로서의 함수
+
+자바스크립트에서 함수는 일종의 객체이다. 따라서 함수는 값을 처리할 수 있으며 프로퍼티와 메서드를 가진다.
+
+#### 함수의 프로퍼티
+
+- caller : 현재 실행 중인 함수를 호출한 함수
+- length : 함수의 인자 개수
+- name : 함수를 표시할 때 사용하는 이름
+- prototype : 포로토타입 객체의 참조
+
+또한 함수는 Function 생성장의 prototype 객체의 프로퍼티를 상속받아서 사용한다.
+
+- apply() : 선택한 this와 인수를 사용하여 함수를 호출한다. 인수는 배열 객체이다.
+- bind() : 선택한 this와 인수를 적용한 새로운 함수를 반환한다.
+- call() : 선택한 this와 인수를 사용하여 함수를 호출한다. 함수는 쉼표로 구분한 값이다.
+- constructor() : Function 생성자의 참조
+- toString() : 함수의 소스 코드를 문자열로 반환.
+
+#### apply와 call 메서드
+
+Function 객체의 메서드에는 apply와 call이 있다. this 값과 함수의 인수를 사용하여 함수를 실행하는 메서드이다. 둘은 본질적으로 같으며 함수에 인수를 넘기는 방법이 다르다.
+```js
+function say(greetings, honorifics) {
+    console.log(greetings + " " + honorifics + this.name);
+}
+
+var tom = {name: "Tom"};
+var becky = {name: "Becky"};
+
+say.apply(tom, ["hello", "Mr."]); //hello Mr.Tom
+say.call(becky, "hi", "Ms."); //hi Ms.Becky
+```
+
+#### bind 메서드
+
+Function 객체의 bind 메서드는 객체에 함수를 바인드한다.
+```js
+function say(greetings, honorifics) {
+    console.log(greetings + " " + honorifics + this.name);
+}
+
+var tom = {name: "Tom"};
+var sayToTom = say.bind(tom);
+sayToTom("Hello", "Mr."); // Hello Mr.Tom
+```
+
+이 코드에서 sayToTom 함수를 호출하면 항상 this가 객체 tom을 가리킨다. 
+
+#### 함수에 프로퍼티 추가하기
+
+다른 객체와 마찬가지로 함수에도 프로퍼티를 추가할 수 있다. 이 프로퍼티는 함수를 실행하지 않아도 읽거나 쓸 수 있다. 이를 응용하여 메모이제이션을 사용할 수 있다.
+```js
+function fibonacci(n) {
+    if (n<2) return n;
+    if (!(n in fibonacci)) {
+        fibonacci[n] = fibonacci(n-1) + fibonacci(n-2);
+    }
+    return fibonacci[n];
+}
+for (var i =0; i<=20; i++) {
+    console.log((" "+i).slice(-2) + ":"+fibonacci(i));
+}
+```
+
+### 콜백 함수
+
+콜백 함수란 다른 함수에 인수로 넘겨지는 함수를 의미한다. 콜백 함수는 함수를 호출할 때 무언가 새로운 일이 생기거나 그 함수의 실행이 끝나면 지정한 콜백 함수를 실행해 주도록 함수에 요청해야 할 때 사용한다. 이 때 콜백 함수의 주체는 어디까지나 함수를 호출한 호출자이다. 호출자가 목적에 따라 어떠한 콜백 함수를 사용할 것인지 정한다. 호출된 함수는 콜백 함수를 실행하지만 그 콜백 함수가 작업하는 내용에는 관여하지 않는다.
+
+### ECMAScript 6부터 추가된 함수의 기능
+
+#### 화살표 함수
+
+화살표 함수는 다음과 같은 차이점이 있다.
+
+1. this의 값이 함수를 정의할 떄 결정된다 : 함수 리터럴로 정의한 함수의 this 값을 함수를 호출할 때 결정된다. 그러나 화살표 함수의 this 값은 함수를 정의할 때 결정된다. 즉, 화살표 함수 바깥의 this값이 화살표 함수의 this 값이 된다.
+
+```js
+var obj = {
+    say: function() {
+        console.log(this); // [object Object]
+        var f = function() {console.log(this);} // [object Window]
+        f();
+        var g = () => console.log(this); //[object Object]
+        g();
+    }
+}
+obj.say();
+```
+
+f는 say라는 함수의 중첩 함수이며 this의 값은 전역 객체를 가르킨다. 한편 화살표 함수 g의 this 값은 함수 g를 정의한 익명 함수의 this값인 객체 obj를 가리킨다.
+
+화살표 함수는 call이나 apply 메서드를 사용하여 this를 바꾸어 호출해도 this 값이 바뀌지 않는다.
+```js
+var f = function() {console.log(this.name);};
+var g = () => console.log(this.name);
+var tom = {name: "Tom"};
+f.call(tom); // "Tom"
+g.call(tom); // ""
+```
+
+2. arguments 변수가 없다. 화살표 함수 안에는 arguments 변수가 정의되어 있지 않다.
+
+3. 생성자로 사용할 수 없다.
+
+4. yield 키워드를 사용할 수 없다.
+
+#### 인수에 추가된 기능
+
+1. 나머지 매개변수 : 인자가 들어가는 부분에 ...를 입력하면 그만큼의 인수를 배열로 받을 수 있다.
+
+2. 인수의 기본 값 인자에 대입 연산자를 사용해서 기본값을 설정할 수 있다.
