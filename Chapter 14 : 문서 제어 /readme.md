@@ -140,3 +140,135 @@ innterText는 다음과 같은 차이점이 있다.
 - textContent는 script 요소 안의 텍스트를 반환하지만 innerText는 반환하지 않는다.
 - textContent는 공백 문자를 그대로 반환하지만 innerText는 남는 공백 문자를 제거한다.
 - innerText는 table, tbody, tr 요소 등의 테이블 요소를 수정할 수 없다.
+
+## 노드 생성/삽입/삭제
+
+### 노드 생성
+
+```js
+var element = document.createElement(요소의 이름); //요소 노드
+var element = document.createTextNode(텍스트); //텍스트 노드
+```
+
+createElement로 생성한 노드 객체는 메모리에 생성되어 있을 뿐 문서의 DOM트리와는 아무런 관계가 없다. 
+
+### 노드 삽입
+
+#### 요소의 마지막에 삽입하기
+
+해당 요소의 마지막 자식으로 노드 객체를 삽입한다.
+```js
+요소 노드.appendChild(삽입할 노드)
+```
+appendChild 메서드로 노드 객체를 삽입하면 그 객체가 DOM 트리에 추가되고 DOM 트리의 각 노드 계층 구조를 정의하는 프로퍼티(parentNode, childNode)가 바뀐다.
+
+#### 지정한 자식 노드의 바로 앞에 삽입하기: insertBefore
+
+```js
+요소 노드.insertBefore(삽입할 노드, 자식 노드)
+```
+
+#### 노드 옮기기
+
+이미 있는 노드를 appendChild, insertBefore 메서드로 문서에 삽입하면 해당 노드를 현재 위치에서 삭제하고 새로운 위치에 삽입한다. 결과적으로 위치를 옮기게 된다.
+
+
+### 노드 삭제하기
+
+```js
+노드.removeChild(자식 노드)
+```
+
+이 떼 삭제할 수 있는 노드가 해당 노드의 자식 노드이다. 즉 삭제하려는 노드의 부모 노드 객체에서 removeChild 메서드를 호출한다. 특정 노드를 삭제하고자 할때는 다음과 같이 작성한다.
+
+```js
+node.parentNode.removeChild(node);
+```
+
+### 노드 치환하기
+```js
+노드.replaceChild(새로운 노드, 자식 노드);
+```
+자식 노드를 제거하고 새로운 노드로 치환한다. 부모 노드에서 자식 노드만 치환할 수 있다.
+
+## HTML 요소의 위치 
+
+### HTML 요소의 위치를 표현하는 좌표계
+
+요소 위치를 표현하기 위한 좌표계에는 뷰포트 좌표계와 문서 좌표계가 있다. 두 좌표계 모두 좌표축의 길이 단위로 픽셀을 사용한다. 
+
+1. 뷰 포트 좌표계 : 뷰 표트의 왼쪽 위 꼭짓점을 원점으로 하는 좌표계이다. 뷰 포트란 웹 브라우저에서 문서의 내용을 표시하는 영역을 말하며, 메뉴, 도구 모음, 탭 등을 포함하지 않는다.
+
+2. 문서 좌표계 : 문서의 왼쪽 위 꼭짓점을 원점으로 하는 좌표계이다. 문서는 웹 브라우저 표시 영역 안에 표시되는데, 문서를 스크롤하면 문서 좌표계의 원점이 뷰 포트를 따라 이동한다. 문서 좌표계를 따르는 요소는 사용자가 문서를 스크롤해도 바뀌지 않는다. 
+
+### HTML 요소의 위치와 크기 구하기
+
+요소 객체의 getBoundingClientRect 메서드는 뷰 포트 좌표계로 측정한 해당 요소의 보더 박스 위치와 크기 정보를 담은 객체를 반환한다.
+
+```js
+var rect = 요소 객체.getBoundingClientRect();
+```
+ClientRect 객체를 반환하며 다음과 같은 프로퍼티를 갖고있다.
+- left : 요소 박스의 왼쪽 위 꼭짓점의 X좌표
+- top : 요소 박스의 왼쪽 위 꼭짓점의 Y좌표
+- right : 요소 박스의 오른쪽 아래 꼭짓점의 X좌표
+- bottom : 요소 박스의 오른쪽 아래 꼭짓점의 Y좌표
+- width : 요소 박스의 너비
+- height : 요소 박스의 높이
+
+### 뷰포트의 크기 가져오기
+```js
+document.documentElement.clientWidth // 뷰 포트의 너비
+document.documentElement.clientHeight // 뷰 포트의 높이
+
+//IE9 이후 웹 브라우저는 다음도 지원한다
+window.innerWidth // 뷰 포트의 너비
+window.innerHeight // 뷰 포트의 높이
+```
+
+### 스크롤한 거리 구하기
+
+문서의 뷰 포트를 스크롤한 거리를 제공하는 프로퍼티는 브라우저마다 다르다.
+
+1. 인터넷 익스플로러, 파이어폭스
+    ```js
+    document.documentElement.scrollLeft 
+    document.documentElement.scrollTop
+    ```
+2. 크롬, 사파리, 오페라, 엣지 등
+    ```js
+    document.body.scrollLeft 
+    document.body.scrollTop
+    ```
+3. 크롬, 파이어폭스, 사파리, 오페라, 엣지, IE9 이상
+    ```js
+    window.pageXOffset
+    window.pageYOffset
+    ```
+
+### 스크롤하기
+
+#### 특정 위치로 스크롤하기
+
+Window 객체의 scrollTo 메서드는 문서 좌표를 인수로 받으며, 뷰 포트 좌표의 원점까지 스크롤한다.
+```js
+window.scrollTo(X,Y);
+```
+
+#### 특정 거리만큼 스크롤하기
+Window 객체의 scrollBy 메서드는 스크롤할 거리를 인수로 받아 문서를 그 거리만큼 스크롤한다.
+```js
+window.scrollBy(dx,dy);
+
+//한 페이지 분량만큼 스크롤하기
+window.scrollBy(0, window.innerHeight);
+```
+
+#### 특정 요소가 있는 위치까지 스크롤하기
+
+요소 객체의 scrollIntoView(alignWithTop) 메서드는 그 요소가 웹 브라우저의 표시 영역에 들어올 때까지 스크롤한다.
+```js
+요소 객체.scrollIntoView(alignWithTop);
+```
+인수 alignWithTop은 생략되면 true로 간주. true일 경우 요소가 표시 영역의 위쪽 끝에 오도록 스크롤한다. false면 요소가 표시 영역의 아래쪽 끝에 오도록 스크롤한다.
+
