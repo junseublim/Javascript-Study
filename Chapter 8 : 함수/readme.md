@@ -77,6 +77,11 @@ function multiply(a, b) {
 
 함수에서는 지역 변수로 arguments 변수가 존재한다. arguments는 Arguments 객체이다. 함수에 인수를 넘기면 순서대로 arguments에 유사 배열 객체로 저장된다.
 
+```js
+    arguments[0] // 첫 번째 인수값
+    arguments[1] // 두 번째 인수값
+```
+
 Arguments 객체는 프로퍼티로 length와 callee를 갖고 있다. 
 - arguments.length : 인수 개수
 - arguments.callee : 현재 실행되고 있는 함수의 참조
